@@ -23,38 +23,43 @@ import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.codec.FileCodecFactory;
+import com.alibaba.dexcodec.FileTransportCodecFactory;
+import com.alibaba.dexcodec.FileTransportDecoder;
+import com.alibaba.dexcodec.FileTransportEncoder;
 import com.alibaba.domain.DeviceStatus;
 import com.alibaba.domain.DevicesPool;
 import com.alibaba.domain.MyRequestObject;
 import com.alibaba.domain.MyResponseObject;
 import com.alibaba.rmi.HelloInterface;
 
-public class MyServer extends UnicastRemoteObject implements MyMina{
+public class MyServer extends UnicastRemoteObject implements MyMina {
 	private static final Logger logger = LoggerFactory
 			.getLogger(MyServer.class);
-	private static IoAcceptor acceptor ;
+	private static IoAcceptor acceptor;
 
 	private static ConcurrentHashMap<String, IoSession> sessionHashMap = new ConcurrentHashMap<String, IoSession>();
 
-	
-	public MyServer() throws RemoteException{
-		
+	public MyServer() throws RemoteException {
+
 	}
-	
-	
-	
-	public  void start() {
+
+	public void start() {
 		acceptor = new NioSocketAcceptor();
 
 		acceptor.getFilterChain().addLast("logger", new LoggingFilter());
 		acceptor.getFilterChain().addLast("codec",
 				new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));
 
+		acceptor.getFilterChain()
+				.addLast(
+						"protocol",
+						new ProtocolCodecFilter(new FileTransportCodecFactory(
+								new FileTransportEncoder(),
+								new FileTransportDecoder())));
+
 		acceptor.setHandler(new ServerHandler());
 
-		
-		
-		
 		try {
 			acceptor.bind(new InetSocketAddress(9999));
 		} catch (IOException ex) {
@@ -75,10 +80,10 @@ public class MyServer extends UnicastRemoteObject implements MyMina{
 			Object key = iter.next();
 			System.out.println("**********");
 			session = (IoSession) conMap.get(key);
-			//System.out.println(session);
+			// System.out.println(session);
 			session.write(message);
-			
-//            session.write("" + key.toString());  
+
+			// session.write("" + key.toString());
 		}
 	}
 
@@ -86,13 +91,13 @@ public class MyServer extends UnicastRemoteObject implements MyMina{
 	public static void sendToClient(Object message, Long sessionId) {
 
 		// sessionCurHashMap为全局变量，是一个ConcurrentHashMap
-//		System.out.println(SessionMap.sessions.size());
-//		System.out.println(SessionMap.sessions.keys());
-//		System.out.println(SessionMap.sessions.values());
-		
+		// System.out.println(SessionMap.sessions.size());
+		// System.out.println(SessionMap.sessions.keys());
+		// System.out.println(SessionMap.sessions.values());
+
 		SessionMap map = SessionMap.getInstance();
 		IoSession sendSession = map.sessions.get(sessionId);
-		
+
 		WriteFuture future = sendSession.write(message); // 发送数据
 		future.awaitUninterruptibly(); // 等待发送数据操作完成
 		if (future.isWritten()) {
@@ -106,9 +111,9 @@ public class MyServer extends UnicastRemoteObject implements MyMina{
 
 	// 测试方法
 	public static void main(String[] args) {
-//		start();
-		
-//		 sendToAllClient(new MyResponseObject("hong", "good"));
+		// start();
+
+		// sendToAllClient(new MyResponseObject("hong", "good"));
 	}
 
 }

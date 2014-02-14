@@ -1,9 +1,10 @@
 package com.alibaba.server;
 
+import java.io.File;
 import java.rmi.Naming;
 
-import com.alibaba.domain.MyResponseObject;
-import com.alibaba.rmi.HelloInterface;
+import com.alibaba.domain.FileResponseObject;
+import com.alibaba.domain.MyFileInputStream;
 
 
 public class TestSendMessage {
@@ -26,23 +27,21 @@ public class TestSendMessage {
 
 			// 调用远程方法
 //			System.out.println(hello.say());
-			server.sendToAllClient(new MyResponseObject("myp", "i love you"));
+			//server.sendToAllClient(new MyResponseObject("myp", "i love you"));
+			
+			
+			
+			//构建一个文件流对象
+			MyFileInputStream mfis = new MyFileInputStream(new File("d:\\tasklist"));
+			FileResponseObject fro = new FileResponseObject("REVICE_FILE", mfis);
+			server.sendToAllClient(fro);
+			
 		} catch (Exception e) {
 			System.out.println("HelloClient exception: " + e);
 		}
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+			
 		
 		
 		

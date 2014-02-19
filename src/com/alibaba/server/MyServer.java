@@ -1,20 +1,15 @@
 package com.alibaba.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.mina.core.future.WriteFuture;
 import org.apache.mina.core.service.IoAcceptor;
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory;
@@ -22,16 +17,6 @@ import org.apache.mina.filter.logging.LoggingFilter;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.alibaba.codec.FileCodecFactory;
-import com.alibaba.dexcodec.FileTransportCodecFactory;
-import com.alibaba.dexcodec.FileTransportDecoder;
-import com.alibaba.dexcodec.FileTransportEncoder;
-import com.alibaba.domain.DeviceStatus;
-import com.alibaba.domain.DevicesPool;
-import com.alibaba.domain.MyRequestObject;
-import com.alibaba.domain.MyResponseObject;
-import com.alibaba.rmi.HelloInterface;
 
 public class MyServer extends UnicastRemoteObject implements MyMina {
 	private static final Logger logger = LoggerFactory
@@ -51,17 +36,10 @@ public class MyServer extends UnicastRemoteObject implements MyMina {
 		acceptor.getFilterChain().addLast("codec",
 				new ProtocolCodecFilter(new ObjectSerializationCodecFactory()));
 
-		acceptor.getFilterChain()
-				.addLast(
-						"protocol",
-						new ProtocolCodecFilter(new FileTransportCodecFactory(
-								new FileTransportEncoder(),
-								new FileTransportDecoder())));
-
 		acceptor.setHandler(new ServerHandler());
 
 		try {
-			acceptor.bind(new InetSocketAddress(9999));
+			acceptor.bind(new InetSocketAddress(10001));
 		} catch (IOException ex) {
 			logger.error(ex.getMessage(), ex);
 		}
